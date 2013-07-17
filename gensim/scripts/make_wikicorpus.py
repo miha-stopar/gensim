@@ -57,10 +57,15 @@ if __name__ == '__main__':
     logger.info("running %s" % ' '.join(sys.argv))
 
     # check and process input arguments
-    if len(sys.argv) < 3:
-        print globals()['__doc__'] % locals()
-        sys.exit(1)
-    inp, outp = sys.argv[1:3]
+    #if len(sys.argv) < 3:
+    #    print globals()['__doc__'] % locals()
+    #    sys.exit(1)
+    #inp, outp = sys.argv[1:3]
+    lang_lang = "en", "en"
+    inp = "/home/miha/wikipedia/slwiki-latest-pages-articles.xml.bz2" 
+    output_dir = "/home/miha/wikipedia/%s_%s" % (lang_lang[0], lang_lang[1])
+    outp = "%s/wiki_%s_%s" % (output_dir, lang_lang[0], lang_lang[1])  
+    
     if len(sys.argv) > 3:
         keep_words = int(sys.argv[3])
     else:

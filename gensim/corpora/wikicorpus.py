@@ -30,6 +30,9 @@ from gensim import utils
 from gensim.corpora.dictionary import Dictionary
 from gensim.corpora.textcorpus import TextCorpus
 
+import MySQLdb
+from gensim.scripts.wikiapi import WikiApi
+
 logger = logging.getLogger('gensim.corpora.wikicorpus')
 
 # ignore articles shorter than ARTICLE_MIN_WORDS characters (after full preprocessing)
@@ -190,6 +193,8 @@ def _extract_pages(f):
         Generates (title, content) pairs.
     """
     elems = (elem for _, elem in iterparse(f, events=("end",)))
+    db= MySQLdb.connect(host="localhost", user="root", passwd="bla", db="sllanglinks")
+    wapi = WikiApi()
 
     # We can't rely on the namespace for database dumps, since it's changed
     # it every time a small modification to the format is made. So, determine
@@ -201,13 +206,33 @@ def _extract_pages(f):
     page_tag = "{%(ns)s}page" % ns_mapping
     text_path = "./{%(ns)s}revision/{%(ns)s}text" % ns_mapping
     title_path = "./{%(ns)s}title" % ns_mapping
+    id_path = "./{%(ns)s}id" % ns_mapping
 
+    count = 0
     for elem in elems:
         if elem.tag == page_tag:
             title = elem.find(title_path).text
             text = elem.find(text_path).text
+            page_id = elem.find(id_path).text
+            cur = db.cursor()
+            cur.execute('select * from langlinks where ll_from=%s and ll_lang="en";' % page_id)
+            row = cur.fetchone()
+            if row == None:
+                continue
+            #print title
+            page_title = row[2]
+            #print page_title
+            try:
+                content = wapi.get_article(page_title)
+            except Exception as e:
+                print e
+                continue
+            text += " " + content
+            count += 1
+            #print "--------------"
+            if count % 10 == 0:
+                print count, "======================================================================="
             yield title, text or ""     # empty page will yield None
-
             # Prune the element tree, as per
             # http://www.ibm.com/developerworks/xml/library/x-hiperfparse/
             # except that we don't need to prune backlinks from the parent
