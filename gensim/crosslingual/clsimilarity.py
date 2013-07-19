@@ -13,15 +13,18 @@ class CLSimilarity():
             self.models[model] = gsimilarity.GSimilarity(lang1, lang2, mm_path, model_path)
         self.langs = languages.Languages()
         
-    def compare(self, text1, text2):
-        lang1 = self.langs.detect_lang(text1)
-        lang2 = self.langs.detect_lang(text2)
+    def compare(self, text1, text2, lang1=None, lang2=None):
+        if lang1 == None:
+            lang1 = self.langs.detect_lang(text1)
+        if lang2 == None:
+            lang2 = self.langs.detect_lang(text2)
         model = self.models["%s_%s" % (lang1, lang2)]
         similarity = model.compare(text1, text2)
         return similarity
     
     
 if __name__ == "__main__":
+    # for testing
     model_paths = {"sl_en" : ("/home/miha/Desktop/starcluster-downloaded/sl_en", 
                               "/home/miha/Desktop/wiki-models/sl_en")}
     cl = CLSimilarity(model_paths)

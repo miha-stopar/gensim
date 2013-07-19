@@ -12,12 +12,18 @@ Required steps:
   in this case: slwiki-latest-pages-articles.xml.bz2 from http://dumps.wikimedia.org/slwiki/latest/) -
   make_wikicorpus.py script will iterate over pages in this dump and for each page it will fetch the 
   counterpart English page using Wikipedia API)
+  
   * download slwiki-latest-langlinks.sql.gz (contains links from Slovenian pages to the counterpart
   pages written in other languages) and unzip it
+  
   * MySQL console: create database sllanglinks
+  
   * mysql -u root -p sllanglinks < slwiki-latest-langlinks.sql
+  
   * set the MySQL username/password in wikicorpus.py
+  
   * set the paths inside scripts/make_wikicorpus.py (BZ2 file and output folder)
+  
   * execute make_wikicorpus.py
 
 * Build LsiModel (set the paths inside scripts/build_lsi.py and execute it)
