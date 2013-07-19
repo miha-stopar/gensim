@@ -282,6 +282,22 @@ class Dictionary(utils.SaveLoad, UserDict.DictMixin):
                 result.dfs[wordid] = int(docfreq)
         return result
 
+    @staticmethod
+    def load_from_bz2(b):
+        """
+        Load a previously stored Dictionary from a bz2 file.
+        """
+        result = Dictionary()
+        for line in b.readlines():
+            try:
+                wordid, word, docfreq = line[:-1].split('\t')
+            except Exception:
+                raise ValueError("invalid line in dictionary file: %s"
+                                 % (line.strip()))
+            wordid = int(wordid)
+            result.token2id[word] = wordid
+            result.dfs[wordid] = int(docfreq)
+        return result
 
     @staticmethod
     def from_corpus(corpus):

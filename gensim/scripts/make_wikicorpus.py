@@ -61,7 +61,7 @@ if __name__ == '__main__':
     #    print globals()['__doc__'] % locals()
     #    sys.exit(1)
     #inp, outp = sys.argv[1:3]
-    lang_lang = "en", "en"
+    lang_lang = "sl", "en"
     inp = "/home/miha/wikipedia/slwiki-latest-pages-articles.xml.bz2" 
     output_dir = "/home/miha/wikipedia/%s_%s" % (lang_lang[0], lang_lang[1])
     outp = "%s/wiki_%s_%s" % (output_dir, lang_lang[0], lang_lang[1])  
@@ -89,7 +89,8 @@ if __name__ == '__main__':
         # only keep the most frequent words (out of total ~8.2m unique tokens)
         wiki.dictionary.filter_extremes(no_below=20, no_above=0.1, keep_n=DEFAULT_DICT_SIZE)
         # save dictionary and bag-of-words (term-document frequency matrix)
-        MmCorpus.serialize(outp + '_bow.mm', wiki, progress_cnt=10000) # another ~9h
+        MmCorpus.serialize(outp + '_bow.mm', wiki, progress_cnt=10000) # another ~9h (this is the second time when
+        # it goes through the articles - see __iter__ in TextCorpus
         wiki.dictionary.save_as_text(outp + '_wordids.txt.bz2')
         # load back the id->word mapping directly from file
         # this seems to save more memory, compared to keeping the wiki.dictionary object from above
