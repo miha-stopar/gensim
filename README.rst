@@ -1,28 +1,28 @@
-========================
+This is a fork of Gensim where some cross-lingual capabilities are added to the WikiCorpus. Originally,
+WikiCorpus iterates over Wikipedia articles inside provided XML dump for some specific language. 
+Here, you can find some additional functionality which at each iteration through XML dump
+downloads counterpart article from some other Wikipedia (similar article written in some other language).
 
-This is an attempt to add support for cross-lingual LSI to the Gensim library (based on Wikipedia).
-Basically, it is about a support for comparing the similarity of the two texts in different languages. 
-The steps below are described for Slovenian-English model.
+This enables for example doing LSI over cross-lingual documents and comparing the similarity 
+of the two texts written in different languages. 
+
+The steps below are described for Slovenian-English cross-lingual case.
 
 Required steps:
 
 * Build WikiCorpus
 
-  * download Wikipedia XML dump for the language which has a smaller amount of articles (Slovenian
-  in this case: slwiki-latest-pages-articles.xml.bz2 from http://dumps.wikimedia.org/slwiki/latest/) -
-  make_wikicorpus.py script will iterate over pages in this dump and for each page it will fetch the 
-  counterpart English page using Wikipedia API)
+  * download Wikipedia XML dump for the language which has a smaller amount of articles (Slovenian in this case: slwiki-latest-pages-articles.xml.bz2)
   
-  * download slwiki-latest-langlinks.sql.gz (contains links from Slovenian pages to the counterpart
-  pages written in other languages) and unzip it
+  * download slwiki-latest-langlinks.sql.gz (contains links from Slovenian articles to the counterpart articles in English) and unzip it
   
-  * MySQL console: create database sllanglinks
+  * Go into MySQL console and execute: create database sllanglinks
   
-  * mysql -u root -p sllanglinks < slwiki-latest-langlinks.sql
+  * Execute in the console: mysql -u root -p sllanglinks < slwiki-latest-langlinks.sql
   
-  * set the MySQL username/password in wikicorpus.py
+  * set MySQL username/password in wikicorpus.py
   
-  * set the paths inside scripts/make_wikicorpus.py (BZ2 file and output folder)
+  * set the paths inside scripts/make_wikicorpus.py (BZ2 file, output folder, languages,)
   
   * execute make_wikicorpus.py
 

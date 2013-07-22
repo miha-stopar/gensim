@@ -33,7 +33,7 @@ class WikiApi:
             self.options['locale'] = 'en'
         requests_log = logging.getLogger("requests")
         requests_log.setLevel(logging.WARNING)
-
+        
     def get_article(self, title):
         url = '{0}://{1}.{2}{3}'.format(uri_scheme, self.options['locale'], article_uri, title)
         html = PyQuery(self.get(url))

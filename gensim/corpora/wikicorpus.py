@@ -30,9 +30,6 @@ from gensim import utils
 from gensim.corpora.dictionary import Dictionary
 from gensim.corpora.textcorpus import TextCorpus
 
-import MySQLdb
-from gensim.scripts.wikiapi import WikiApi
-
 logger = logging.getLogger('gensim.corpora.wikicorpus')
 
 # ignore articles shorter than ARTICLE_MIN_WORDS characters (after full preprocessing)
@@ -183,7 +180,7 @@ def _get_namespace(tag):
     return namespace
 
 
-def _extract_pages(f):
+def _extract_pages(f, crosslingual, lang2):
     """
     Extract pages from MediaWiki database dump.
 
@@ -193,8 +190,11 @@ def _extract_pages(f):
         Generates (title, content) pairs.
     """
     elems = (elem for _, elem in iterparse(f, events=("end",)))
-    db= MySQLdb.connect(host="localhost", user="root", passwd="bla", db="sllanglinks")
-    wapi = WikiApi()
+    if crosslingual:
+        import MySQLdb
+        from gensim.scripts.wikiapi import WikiApi
+        db= MySQLdb.connect(host="localhost", user="root", passwd="bla", db="sllanglinks") # set up user/passwd
+        wapi = WikiApi({'locale':lang2})
 
     # We can't rely on the namespace for database dumps, since it's changed
     # it every time a small modification to the format is made. So, determine
@@ -213,25 +213,31 @@ def _extract_pages(f):
         if elem.tag == page_tag:
             title = elem.find(title_path).text
             text = elem.find(text_path).text
-            page_id = elem.find(id_path).text
-            cur = db.cursor()
-            cur.execute('select * from langlinks where ll_from=%s and ll_lang="en";' % page_id)
-            row = cur.fetchone()
-            if row == None:
-                continue
-            #print title
-            page_title = row[2]
-            #print page_title
-            try:
-                content = wapi.get_article(page_title)
-            except Exception as e:
-                print e
-                continue
-            text += " " + content
+            if crosslingual:
+                page_id = elem.find(id_path).text
+                cur = db.cursor()
+                cur.execute('select * from langlinks where ll_from=%s and ll_lang="%s";' % (page_id, lang2))
+                row = cur.fetchone()
+                if row == None:
+                    continue
+                #print title
+                page_title = row[2]
+                #print page_title
+                #print text
+                #print "--------------------------------------------------"
+                try:
+                    content = wapi.get_article(page_title)
+                    #print content
+                except Exception as e:
+                    print e
+                    continue
+                text += " " + content
             count += 1
-            #print "--------------"
-            if count % 10 == 0:
-                print count, "======================================================================="
+            print text
+            print "-------------------------------------------"
+            if count % 1 == 0:
+                pass
+                #print count, "======================================================================="
             yield title, text or ""     # empty page will yield None
             # Prune the element tree, as per
             # http://www.ibm.com/developerworks/xml/library/x-hiperfparse/
@@ -269,7 +275,7 @@ class WikiCorpus(TextCorpus):
     >>> wiki.saveAsText('wiki_en_vocab200k') # another 8h, creates a file in MatrixMarket format plus file with id->word
 
     """
-    def __init__(self, fname, processes=None, lemmatize=utils.HAS_PATTERN, dictionary=None):
+    def __init__(self, fname, processes=None, lemmatize=utils.HAS_PATTERN, dictionary=None, crosslingual=False, lang2=None):
         """
         Initialize the corpus. Unless a dictionary is provided, this scans the
         corpus once, to determine its vocabulary.
@@ -280,6 +286,8 @@ class WikiCorpus(TextCorpus):
 
         """
         self.fname = fname
+        self.crosslingual = crosslingual
+        self.lang2 = lang2
         if processes is None:
             processes = max(1, multiprocessing.cpu_count() - 1)
         self.processes = processes
@@ -288,7 +296,6 @@ class WikiCorpus(TextCorpus):
             self.dictionary = Dictionary(self.get_texts())
         else:
             self.dictionary = dictionary
-
 
     def get_texts(self):
         """
@@ -306,7 +313,7 @@ class WikiCorpus(TextCorpus):
         """
         articles, articles_all = 0, 0
         positions, positions_all = 0, 0
-        texts = ((text, self.lemmatize) for _, text in _extract_pages(bz2.BZ2File(self.fname)))
+        texts = ((text, self.lemmatize) for _, text in _extract_pages(bz2.BZ2File(self.fname), self.crosslingual, self.lang2))
         pool = multiprocessing.Pool(self.processes)
         # process the corpus in smaller chunks of docs, because multiprocessing.Pool
         # is dumb and would load the entire input into RAM at once...

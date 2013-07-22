@@ -18,7 +18,7 @@ class GSimilarity():
     def compare(self, text1, text2):
         documents = [text1]
         corpus = (self.id2word.doc2bow(self.tokenize_func(document)) for document in documents)
-        index = Similarity(corpus=self.lsi_transformation[self.logent_transformation[corpus]], num_features=400, output_prefix="shard")
+        index = Similarity(corpus=self.lsi_transformation[self.logent_transformation[corpus]], num_features=100, output_prefix="shard")
         sims_to_query = index[self.lsi_transformation[self.logent_transformation[self.id2word.doc2bow(self.tokenize_func(text2))]]]
         sim = sims_to_query.tolist()[0]
         return sim

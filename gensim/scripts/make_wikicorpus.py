@@ -45,7 +45,8 @@ from gensim.models import TfidfModel
 # Wiki is first scanned for all distinct word types (~7M). The types that
 # appear in more than 10% of articles are removed and from the rest, the
 # DEFAULT_DICT_SIZE most frequent types are kept.
-DEFAULT_DICT_SIZE = 100000
+#DEFAULT_DICT_SIZE = 100000
+DEFAULT_DICT_SIZE = 32000
 
 
 if __name__ == '__main__':
@@ -61,10 +62,11 @@ if __name__ == '__main__':
     #    print globals()['__doc__'] % locals()
     #    sys.exit(1)
     #inp, outp = sys.argv[1:3]
-    lang_lang = "sl", "en"
+    lang1 = "sl"
+    lang2 = "en"
     inp = "/home/miha/wikipedia/slwiki-latest-pages-articles.xml.bz2" 
-    output_dir = "/home/miha/wikipedia/%s_%s" % (lang_lang[0], lang_lang[1])
-    outp = "%s/wiki_%s_%s" % (output_dir, lang_lang[0], lang_lang[1])  
+    output_dir = "/home/miha/wikipedia/%s_%s" % (lang1, lang2)
+    outp = "%s/wiki_%s_%s" % (output_dir, lang1, lang2)  
     
     if len(sys.argv) > 3:
         keep_words = int(sys.argv[3])
@@ -85,7 +87,7 @@ if __name__ == '__main__':
         wiki.save(outp + '_corpus.pkl.bz2')
         dictionary.allow_update = False
     else:
-        wiki = WikiCorpus(inp, lemmatize=lemmatize) # takes about 9h on a macbook pro, for 3.5m articles (june 2011)
+        wiki = WikiCorpus(inp, lemmatize=lemmatize, crosslingual=True, lang2=lang2) # takes about 9h on a macbook pro, for 3.5m articles (june 2011)
         # only keep the most frequent words (out of total ~8.2m unique tokens)
         wiki.dictionary.filter_extremes(no_below=20, no_above=0.1, keep_n=DEFAULT_DICT_SIZE)
         # save dictionary and bag-of-words (term-document frequency matrix)
