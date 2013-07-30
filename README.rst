@@ -1,5 +1,4 @@
 Cross-lingual gensim
----------
 
 This is a fork of Gensim where some cross-lingual capabilities are added to the WikiCorpus. Originally,
 WikiCorpus iterates over articles inside Wikipedia XML dump. 
