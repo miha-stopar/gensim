@@ -23,6 +23,7 @@ import logging
 import re
 from xml.etree.cElementTree import iterparse # LXML isn't faster, so let's go with the built-in solution
 import multiprocessing
+import urllib2
 
 from gensim import utils
 
@@ -192,9 +193,7 @@ def _extract_pages(f, crosslingual, lang2):
     elems = (elem for _, elem in iterparse(f, events=("end",)))
     if crosslingual:
         import MySQLdb
-        from gensim.scripts.wikiapi import WikiApi
         db= MySQLdb.connect(host="localhost", user="root", passwd="bla", db="sllanglinks") # set up user/passwd
-        wapi = WikiApi({'locale':lang2})
 
     # We can't rely on the namespace for database dumps, since it's changed
     # it every time a small modification to the format is made. So, determine
@@ -222,21 +221,15 @@ def _extract_pages(f, crosslingual, lang2):
                     continue
                 #print title
                 page_title = row[2]
-                #print page_title
-                #print text
-                #print "--------------------------------------------------"
                 try:
-                    content = wapi.get_article(page_title)
-                    #print content
+                    content = fetch_article(lang2, page_title)
                 except Exception as e:
                     print e
                     continue
                 text += " " + content
             count += 1
-            print text
-            print "-------------------------------------------"
-            if count % 1 == 0:
-                pass
+            if count == 10:
+                return
                 #print count, "======================================================================="
             yield title, text or ""     # empty page will yield None
             # Prune the element tree, as per
@@ -247,7 +240,6 @@ def _extract_pages(f, crosslingual, lang2):
             # ./revision/text element. The pages comprise the bulk of the
             # file, so in practice we prune away enough.
             elem.clear()
-
 
 def process_article(args):
     """
@@ -262,7 +254,14 @@ def process_article(args):
         result = tokenize(text)
     return result
 
-
+def fetch_article(lang, title):
+        title = title.replace(" ", "_")
+        url = 'http://%s.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&titles=%s&format=xml' % (lang, title)
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        infile = opener.open(url)
+        xml = infile.read()
+        return xml
 
 class WikiCorpus(TextCorpus):
     """

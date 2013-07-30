@@ -1,9 +1,12 @@
-This is a fork of Gensim where some cross-lingual capabilities are added to the WikiCorpus. Originally,
-WikiCorpus iterates over Wikipedia articles inside provided XML dump for some specific language. 
-Here, you can find some additional functionality which at each iteration through XML dump
-downloads counterpart article from some other Wikipedia (similar article written in some other language).
+Cross-lingual gensim
+---------
 
-This enables for example doing LSI over cross-lingual documents and comparing the similarity 
+This is a fork of Gensim where some cross-lingual capabilities are added to the WikiCorpus. Originally,
+WikiCorpus iterates over articles inside Wikipedia XML dump. 
+Here, you can find some additional functionality which at each iteration through XML dump
+downloads counterpart Wikipedia article for some other language (the same article written in some other language).
+
+This enables doing LSI over cross-lingual documents and comparing the similarity 
 of the two texts written in different languages. 
 
 The steps below are described for Slovenian-English cross-lingual case.
@@ -16,9 +19,9 @@ Required steps:
   
   * download slwiki-latest-langlinks.sql.gz (contains links from Slovenian articles to the counterpart articles in English) and unzip it
   
-  * Go into MySQL console and execute: create database sllanglinks
+  * go into MySQL console and execute: create database sllanglinks
   
-  * Execute in the console: mysql -u root -p sllanglinks < slwiki-latest-langlinks.sql
+  * execute in the console: mysql -u root -p sllanglinks < slwiki-latest-langlinks.sql
   
   * set MySQL username/password in wikicorpus.py
   

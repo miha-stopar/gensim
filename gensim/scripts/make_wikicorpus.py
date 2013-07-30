@@ -66,7 +66,9 @@ if __name__ == '__main__':
     lang2 = "en"
     inp = "/home/miha/wikipedia/slwiki-latest-pages-articles.xml.bz2" 
     output_dir = "/home/miha/wikipedia/%s_%s" % (lang1, lang2)
-    outp = "%s/wiki_%s_%s" % (output_dir, lang1, lang2)  
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    outp = "%s/wiki_%s_%s" % (output_dir, lang1, lang2)
     
     if len(sys.argv) > 3:
         keep_words = int(sys.argv[3])

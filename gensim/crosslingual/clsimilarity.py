@@ -1,7 +1,22 @@
 import languages
 import gsimilarity
 
-class CLSimilarity():
+class Similarity():
+    def __init__(self, lang1, lang2, mm_path, model_path):
+        # mm_path is output folder of make_wikicorpus.py
+        # model_path is output folder of build_lsi.py
+        self.model = gsimilarity.GSimilarity(lang1, lang2, mm_path, model_path)
+        
+    def compare(self, text1, text2, lang1, lang2):
+        model = self.models["%s_%s" % (lang1, lang2)]
+        similarity = model.compare(text1, text2)
+        return similarity
+
+class SimilarityMulti():
+    """
+    If you have more than one models ("sl_en", "sl_de", ...) and want to enable
+    automatic detection of language ("en", "de", ...) of texts which are to be compared.
+    """
     def __init__(self, model_paths):
         # mm_path is output folder of make_wikicorpus.py
         # model_path is output folder of build_lsi.py
@@ -25,9 +40,11 @@ class CLSimilarity():
     
 if __name__ == "__main__":
     # for testing
-    model_paths = {"sl_en" : ("/home/miha/Desktop/starcluster-downloaded/sl_en", 
-                              "/home/miha/Desktop/wiki-models/sl_en")}
-    cl = CLSimilarity(model_paths)
+    mm_path = "/home/miha/Desktop/starcluster-downloaded/sl_en"
+    model_path = "/home/miha/Desktop/wiki-models/sl_en"
+    model_paths = {"sl_en" : (mm_path, model_path)}
+    cl = SimilarityMulti(model_paths)
+    # cl = Similarity("sl", "en", mm_path, model_path)
     print cl.compare("drevo je rastlina, ni pa jabolko", "tree is a fruit")
     print cl.compare("drevo je rastlina, ni pa jabolko", "do you see your shoes")
     
