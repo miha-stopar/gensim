@@ -30,6 +30,19 @@ Required steps:
 
 * Build LsiModel (set the paths inside scripts/build_lsi.py and execute it)
 
+* Compute the similarity between Slovenian and English text::
+
+	from gensim.crosslingual import clsimilarity
+	
+	mm_path = "/home/miha/Desktop/starcluster-downloaded/sl_en"
+    model_path = "/home/miha/Desktop/wiki-models/sl_en"
+    model_paths = {"sl_en" : (mm_path, model_path)}
+    #cl = SimilarityMulti(model_paths)
+    cl = Similarity("sl", "en", mm_path, model_path)
+    print cl.compare("drevo je rastlina, ni pa jabolko", "tree is a fruit")
+    print cl.compare("drevo je rastlina, ni pa jabolko", "your shoes are blue")
+
+
 
 ==============================================
 gensim -- Python Framework for Topic Modelling

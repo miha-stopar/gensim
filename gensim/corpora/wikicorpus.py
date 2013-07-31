@@ -181,7 +181,7 @@ def _get_namespace(tag):
     return namespace
 
 
-def _extract_pages(f, crosslingual, lang2):
+def _extract_pages(f, crosslingual, lang1, lang2):
     """
     Extract pages from MediaWiki database dump.
 
@@ -193,7 +193,7 @@ def _extract_pages(f, crosslingual, lang2):
     elems = (elem for _, elem in iterparse(f, events=("end",)))
     if crosslingual:
         import MySQLdb
-        db= MySQLdb.connect(host="localhost", user="root", passwd="bla", db="sllanglinks") # set up user/passwd
+        db= MySQLdb.connect(host="localhost", user="root", passwd="bla", db="%slanglinks" % lang1) # set up user/passwd
 
     # We can't rely on the namespace for database dumps, since it's changed
     # it every time a small modification to the format is made. So, determine
@@ -274,7 +274,7 @@ class WikiCorpus(TextCorpus):
     >>> wiki.saveAsText('wiki_en_vocab200k') # another 8h, creates a file in MatrixMarket format plus file with id->word
 
     """
-    def __init__(self, fname, processes=None, lemmatize=utils.HAS_PATTERN, dictionary=None, crosslingual=False, lang2=None):
+    def __init__(self, fname, processes=None, lemmatize=utils.HAS_PATTERN, dictionary=None, crosslingual=False, lang1=None, lang2=None):
         """
         Initialize the corpus. Unless a dictionary is provided, this scans the
         corpus once, to determine its vocabulary.
@@ -286,6 +286,7 @@ class WikiCorpus(TextCorpus):
         """
         self.fname = fname
         self.crosslingual = crosslingual
+        self.lang1 = lang1
         self.lang2 = lang2
         if processes is None:
             processes = max(1, multiprocessing.cpu_count() - 1)
@@ -312,7 +313,7 @@ class WikiCorpus(TextCorpus):
         """
         articles, articles_all = 0, 0
         positions, positions_all = 0, 0
-        texts = ((text, self.lemmatize) for _, text in _extract_pages(bz2.BZ2File(self.fname), self.crosslingual, self.lang2))
+        texts = ((text, self.lemmatize) for _, text in _extract_pages(bz2.BZ2File(self.fname), self.crosslingual, self.lang1, self.lang2))
         pool = multiprocessing.Pool(self.processes)
         # process the corpus in smaller chunks of docs, because multiprocessing.Pool
         # is dumb and would load the entire input into RAM at once...
