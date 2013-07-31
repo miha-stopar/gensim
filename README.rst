@@ -31,7 +31,6 @@ Required steps:
 * Build LsiModel (set the paths inside scripts/build_lsi.py and execute it)
 
 * Compute the similarity between Slovenian and English text::
-
 	from gensim.crosslingual import clsimilarity
 	mm_path = "/home/miha/Desktop/starcluster-downloaded/sl_en"
     model_path = "/home/miha/Desktop/wiki-models/sl_en"
